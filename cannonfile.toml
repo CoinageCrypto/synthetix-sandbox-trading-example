@@ -1,0 +1,6 @@
+name = "synthetix-trading-example"
+version = "0.0.1"
+description = "Demos using the synthetix-sandbox package to create an account and place a trade"
+
+[import.synthetixSandbox]
+source ="synthetix-sandbox:3.3.4"
