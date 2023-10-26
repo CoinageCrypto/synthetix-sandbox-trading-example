@@ -1,6 +1,4 @@
 import hardhat, { ethers } from 'hardhat';
-import PerpsMarketProxy from '../deployments/perpsMarket/PerpsMarketProxy.json';
-import { ContractReceipt } from 'ethers';
 
 let cannonBuildResult: any;
 const cannonBuild = async () => {
@@ -31,15 +29,22 @@ describe('Synthetix v3', async () => {
 		const { signers, outputs } = await cannonBuild();
 		const [signer] = signers;
 
-		const iface = new ethers.utils.Interface([
-			'function createAccount() external returns (uint128 accountId)',
-		]);
+		const perpsMarketProxy = new ethers.Contract(
+			outputs.imports.synthetixSandbox.imports.perpsMarket.contracts.PerpsMarketProxy.address,
+			outputs.imports.synthetixSandbox.imports.perpsMarket.contracts.PerpsMarketProxy.abi,
+			signer
+		);
 
-		const tx = await signer.sendTransaction({
-			to: outputs.imports.synthetixSandbox.imports.perpsMarket.contracts.PerpsMarketProxy.address,
-			data: iface.encodeFunctionData('createAccount'),
-		});
+		const tx = await perpsMarketProxy['createAccount()']();
 
-		console.log(await tx.wait());
+		const receipt = await tx.wait();
+		for (const { event } of receipt.events) {
+			if (event) {
+				console.log('----------------------');
+				console.log('From TypeScript: ');
+				console.log(` - Got event ${event}`);
+				console.log('----------------------');
+			}
+		}
 	});
 });
